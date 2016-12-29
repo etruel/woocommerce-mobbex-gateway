@@ -342,20 +342,92 @@ class WC_Gateway_Payment_Gateway_mobbex extends WC_Payment_Gateway {
     $order = new WC_Order( $order_id );
 
     // This array is used just for demo testing a successful transaction.
-    $payment = array( 
-      'id'     => 123,
-      'status' => 'APPROVED'
-    );
-
-    if( $this->debug == 'yes' ) {
-      $this->log->add( $this->id, 'Mobbex payment response: ' . print_r( $payment, true ) . ')' );
+    $description = '';
+    foreach ( $order->get_items() as $item ) {
+        $description .= $item['name'].PHP_EOL;
     }
 
+    $response = wp_remote_post('https://mobbex.com/p/checkout/create', array(
+        'method' => 'POST',
+        'timeout' => 45,
+        'redirection' => 5,
+        'httpversion' => '1.0',
+        'blocking' => true,
+        'headers' => array(
+              'postman-token' => '4533ef25-f802-5fcc-cc03-'.md5(time()),
+              'cache-control' => 'no-cache',
+              'content-type' => 'application/x-www-form-urlencoded',
+              'x-access-token' =>  $this->access_token,
+              'x-api-key' => $this->api_key
+          ),
+        'body' => array(
+              'total' => $order->get_total(),
+              'reference' => '#'.$order_id,
+              'description' => $description,
+              'return_url' => $this->get_return_url( $order )
+          ),
+        'cookies' => array()
+        )
+    );
+
+    if ( is_wp_error( $response ) ) {
+        $this->log->add( $this->id, 'Mobbex error: ' . $response->get_error_message() . '' );
+    } else {
+      error_log(var_export(array(
+          'postman-token' => '4533ef25-f802-5fcc-cc03-'.md5(time()),
+          'cache-control' => 'no-cache',
+          'content-type' => 'application/x-www-form-urlencoded',
+          'x-access-token' =>  $this->access_token,
+          'x-api-key' => $this->api_key
+      ), true));
+     
+      error_log(var_export(array(
+          'total' => $order->get_total(),
+          'reference' => '#'.$order_id,
+          'description' => $description,
+          'return_url' => $this->get_return_url( $order )
+      ), true)); 
+      try {
+        
+        if( $this->debug == 'yes' ) {
+          $this->log->add( $this->id, 'Mobbex payment response: ' . print_r($response['body'], true ) . ')' );
+        }   
+        error_log($response['body']);
+        $json_response = json_decode($response['body']);
+
+        ob_start();
+        var_dump($json_response);
+        $deug = ob_get_clean();
+        error_log($deug);
+
+        if (!empty($json_response->data->url) &&  $json_response->result) {
+            return array(
+              'result' => 'success',
+              'redirect' => $json_response->data->url
+            );
+        }
+       
+      } catch (HttpException $ex) {
+          wc_add_notice($ex->getMessage(), 'error' );
+          if( $this->debug == 'yes' ) {
+            $this->log->add( $this->id, 'Mobbex error: ' . $ex->getMessage() . '' );
+          }
+      }
+
+
+
+
+    }
+   
+    
+   
+    return array(
+        'result' => 'failure',
+        'redirect' => ''
+    );
     /**
-     * TODO: Call your gateway api and return it's results.
-     * e.g. return the the payment status and if 'APPROVED' 
-     * then WooCommerce will complete the order.
-     */
+     
+     
     if( 'APPROVED' == $payment['status'] ) {
       // Payment complete.
       $order->payment_complete();
@@ -404,7 +476,7 @@ class WC_Gateway_Payment_Gateway_mobbex extends WC_Payment_Gateway {
         'message'  => '',
         'redirect' => ''
       );
-    }
+    }*/
   }
 
   /**
@@ -460,12 +532,9 @@ class WC_Gateway_Payment_Gateway_mobbex extends WC_Payment_Gateway {
    * @return string
    */
   public function get_transaction_url( $order ) {
-    if( $this->sandbox == 'yes' ) {
+    
       $this->view_transaction_url = 'https://www.sandbox.payment-gateway.com/?trans_id=%s';
-    }
-    else {
-      $this->view_transaction_url = 'https://www.payment-gateway.com/?trans_id=%s';
-    }
+   
 
     return parent::get_transaction_url( $order );
   }
