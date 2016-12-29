@@ -341,6 +341,7 @@ class WC_Gateway_Payment_Gateway_mobbex extends WC_Payment_Gateway {
   public function process_payment( $order_id ) {
     $order = new WC_Order( $order_id );
 
+    $return_url = add_query_arg( 'wcm_p_method', 'mobbex', $this->get_return_url( $order ));
     // This array is used just for demo testing a successful transaction.
     $description = '';
     foreach ( $order->get_items() as $item ) {
@@ -364,7 +365,7 @@ class WC_Gateway_Payment_Gateway_mobbex extends WC_Payment_Gateway {
               'total' => $order->get_total(),
               'reference' => '#'.$order_id,
               'description' => $description,
-              'return_url' => $this->get_return_url( $order )
+              'return_url' => $return_url
           ),
         'cookies' => array()
         )
@@ -373,26 +374,12 @@ class WC_Gateway_Payment_Gateway_mobbex extends WC_Payment_Gateway {
     if ( is_wp_error( $response ) ) {
         $this->log->add( $this->id, 'Mobbex error: ' . $response->get_error_message() . '' );
     } else {
-      error_log(var_export(array(
-          'postman-token' => '4533ef25-f802-5fcc-cc03-'.md5(time()),
-          'cache-control' => 'no-cache',
-          'content-type' => 'application/x-www-form-urlencoded',
-          'x-access-token' =>  $this->access_token,
-          'x-api-key' => $this->api_key
-      ), true));
-     
-      error_log(var_export(array(
-          'total' => $order->get_total(),
-          'reference' => '#'.$order_id,
-          'description' => $description,
-          'return_url' => $this->get_return_url( $order )
-      ), true)); 
+      
       try {
         
         if( $this->debug == 'yes' ) {
           $this->log->add( $this->id, 'Mobbex payment response: ' . print_r($response['body'], true ) . ')' );
         }   
-        error_log($response['body']);
         $json_response = json_decode($response['body']);
 
         ob_start();
