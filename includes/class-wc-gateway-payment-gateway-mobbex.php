@@ -424,9 +424,6 @@ class WC_Gateway_Payment_Gateway_mobbex extends WC_Payment_Gateway {
     $token_ipn = md5($this->access_token.'|'.$this->api_key);
     $webhook_url = add_query_arg('token_mobbex_ipn', $token_ipn, $this->notify_url); 
     $webhook_url = add_query_arg('order_id', $order_id, $webhook_url); 
-    if( $this->debug == 'yes' ) {
-        $this->log->add( $this->id, 'Mobbex WebHook: ' . $webhook_url. ''.PHP_EOL );
-    }  
     $response = wp_remote_post('https://mobbex.com/p/checkout/create', array(
         'method' => 'POST',
         'timeout' => 45,
