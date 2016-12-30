@@ -30,10 +30,11 @@ class WC_Gateway_Payment_Gateway_mobbex extends WC_Payment_Gateway {
     $this->method_description = __( 'Take payments via Mobbex.', 'woocommerce-payment-gateway-mobbex' );
 
     // TODO: Rename 'WC_Gateway_Payment_Gateway_mobbex' to match the name of this class.
-    $this->notify_url         = WC()->api_request_url( 'WC_Gateway_Payment_Gateway_mobbex' );
+    $this->notify_url         = WC()->api_request_url( 'WC_Gateway_Mobbex' );
 
+   
     // TODO: 
-    $this->api_endpoint       = 'https://api.payment-gateway.com/';
+    $this->api_endpoint       = 'https://mobbex.com/';
 
     // TODO: Use only what the payment gateway supports.
     $this->supports           = array(
@@ -84,20 +85,83 @@ class WC_Gateway_Payment_Gateway_mobbex extends WC_Payment_Gateway {
     $this->init_gateway_sdk();
 
     // Hooks.
-    if( is_admin() ) {
+   
       add_action( 'wp_enqueue_scripts', array( $this, 'payment_scripts' ) );
       add_action( 'admin_notices', array( $this, 'checks' ) );
 
       add_action( 'woocommerce_receipt_' . $this->id, array( $this, 'receipt_page' ) );
       add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
-    }
+    
 
     add_action( 'woocommerce_thankyou_' . $this->id, array( $this, 'thankyou_page' ) );
 
     // Customer Emails.
     add_action( 'woocommerce_email_before_order_table', array( $this, 'email_instructions' ), 10, 3 );
+
+    add_action( 'woocommerce_api_wc_gateway_mobbex', array( $this, 'check_ipn_response' ) );
   }
 
+
+  public function check_ipn_response() {
+      if( $this->debug == 'yes' ) {
+          $this->log->add( $this->id, 'Mobbex IPN response: ' . print_r($_REQUEST, true ) . '' );
+      }  
+      if (!empty($_REQUEST['token_mobbex_ipn']) && !empty($_REQUEST['order_id'])) {
+          $token_ipn = md5($this->access_token.'|'.$this->api_key);
+          if ($_REQUEST['token_mobbex_ipn'] == $token_ipn) {
+            $payment = array();
+            $payment['id'] = 111;
+            $order = new WC_Order( $_REQUEST['order_id'] );
+            // Payment complete.
+            $order->payment_complete();
+
+            // Store the transaction ID for WC 2.2 or later.
+            add_post_meta( $order->id, '_transaction_id', $payment['id'], true );
+
+              // Add order note.
+            $order->add_order_note( sprintf( __( 'Mobbex payment approved (ID: %s)', 'woocommerce-payment-gateway-mobbex' ), $payment['id'] ) );
+
+            if( $this->debug == 'yes' ) {
+                $this->log->add( $this->id, 'Mobbex payment approved (ID: ' . $payment['id'] . ')' );
+            }
+
+              // Reduce stock levels.
+            $order->reduce_order_stock();
+
+            if( $this->debug == 'yes' ) {
+                $this->log->add( $this->id, 'Stocked reduced.' );
+            }
+
+            // Remove items from cart.
+            WC()->cart->empty_cart();
+
+            if( $this->debug == 'yes' ) {
+                $this->log->add( $this->id, 'Cart emptied.' );
+            }
+
+              // Return thank you page redirect.
+            return true;
+           
+            /* else {
+              // Add order note.
+              $order->add_order_note( __( 'Gateway Name payment declined', 'woocommerce-payment-gateway-mobbex' ) );
+
+              if( $this->debug == 'yes' ) {
+                $this->log->add( $this->id, 'Gateway Name payment declined (ID: ' . $payment['id'] . ')' );
+              }
+
+              // Return message to customer.
+              return array(
+                'result'   => 'failure',
+                'message'  => '',
+                'redirect' => ''
+              );
+            }
+             */ 
+          }
+      }
+
+  } 
   /**
    * Init Payment Gateway SDK.
    *
@@ -237,7 +301,17 @@ class WC_Gateway_Payment_Gateway_mobbex extends WC_Payment_Gateway {
    * @return void
    */
   public function receipt_page( $order ) {
-    echo '<p>' . __( 'Thank you - your order is now pending payment.', 'woocommerce-payment-gateway-mobbex' ) . '</p>';
+   
+   /*
+    if (!empty($_REQUEST['wcm_p_method']) && isset($_REQUEST['status'])) {
+        if ($_REQUEST['status'] == 0 || $_REQUEST['status'] == 601) {
+            echo '<p>' . __( 'Your order is cancelled.', 'woocommerce-payment-gateway-mobbex' ) . '</p>';
+        } else if ($_REQUEST['status'] == 200 || $_REQUEST['status'] == 300) {
+            echo '<p>' . __( 'Thank you - your order is now processing.', 'woocommerce-payment-gateway-mobbex' ) . '</p>';
+        }
+
+    }*/
+    
 
     // TODO: 
   }
@@ -347,7 +421,9 @@ class WC_Gateway_Payment_Gateway_mobbex extends WC_Payment_Gateway {
     foreach ( $order->get_items() as $item ) {
         $description .= $item['name'].PHP_EOL;
     }
-
+    $token_ipn = md5($this->access_token.'|'.$this->api_key);
+    $webhook_url = add_query_arg('token_mobbex_ipn', $token_ipn, $this->notify_url); 
+    $webhook_url = add_query_arg('order_id', $order_id, $webhook_url); 
     $response = wp_remote_post('https://mobbex.com/p/checkout/create', array(
         'method' => 'POST',
         'timeout' => 45,
@@ -365,7 +441,9 @@ class WC_Gateway_Payment_Gateway_mobbex extends WC_Payment_Gateway {
               'total' => $order->get_total(),
               'reference' => '#'.$order_id,
               'description' => $description,
-              'return_url' => $return_url
+              'webhook'     => $webhook_url,
+              'return_url' => $return_url,
+
           ),
         'cookies' => array()
         )
@@ -382,10 +460,7 @@ class WC_Gateway_Payment_Gateway_mobbex extends WC_Payment_Gateway {
         }   
         $json_response = json_decode($response['body']);
 
-        ob_start();
-        var_dump($json_response);
-        $deug = ob_get_clean();
-        error_log($deug);
+        
 
         if (!empty($json_response->data->url) &&  $json_response->result) {
             return array(
@@ -412,58 +487,7 @@ class WC_Gateway_Payment_Gateway_mobbex extends WC_Payment_Gateway {
         'result' => 'failure',
         'redirect' => ''
     );
-    /**
-     
-     
-    if( 'APPROVED' == $payment['status'] ) {
-      // Payment complete.
-      $order->payment_complete();
-
-      // Store the transaction ID for WC 2.2 or later.
-      add_post_meta( $order->id, '_transaction_id', $payment['id'], true );
-
-      // Add order note.
-      $order->add_order_note( sprintf( __( 'Gateway Name payment approved (ID: %s)', 'woocommerce-payment-gateway-mobbex' ), $payment['id'] ) );
-
-      if( $this->debug == 'yes' ) {
-        $this->log->add( $this->id, 'Gateway Name payment approved (ID: ' . $payment['id'] . ')' );
-      }
-
-      // Reduce stock levels.
-      $order->reduce_order_stock();
-
-      if( $this->debug == 'yes' ) {
-        $this->log->add( $this->id, 'Stocked reduced.' );
-      }
-
-      // Remove items from cart.
-      WC()->cart->empty_cart();
-
-      if( $this->debug == 'yes' ) {
-        $this->log->add( $this->id, 'Cart emptied.' );
-      }
-
-      // Return thank you page redirect.
-      return array(
-        'result'   => 'success',
-        'redirect' => $this->get_return_url( $order )
-      );
-    }
-    else {
-      // Add order note.
-      $order->add_order_note( __( 'Gateway Name payment declined', 'woocommerce-payment-gateway-mobbex' ) );
-
-      if( $this->debug == 'yes' ) {
-        $this->log->add( $this->id, 'Gateway Name payment declined (ID: ' . $payment['id'] . ')' );
-      }
-
-      // Return message to customer.
-      return array(
-        'result'   => 'failure',
-        'message'  => '',
-        'redirect' => ''
-      );
-    }*/
+    
   }
 
   /**
