@@ -82,7 +82,7 @@ if( !class_exists( 'WC_Gateway_Mobbex' ) ) {
      * @access public
      * @var    string
      */
-     static public $web_url = "http://www.sebastiendumont.com/plugins/woocommerce-payment-gateway-mobbex/";
+     static public $web_url = "https://bitbucket.org/etruel/woocommerce-mobbex-gateway/";
 
     /**
      * The Gateway documentation URL.
