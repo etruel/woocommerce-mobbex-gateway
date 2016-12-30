@@ -8,7 +8,7 @@
  * Author URI:        https://etruel.com
  * Requires at least: 4.1
  * Tested up to:      4.8
- * Text Domain:       woocommerce-payment-gateway-mobbex
+ * Text Domain:       woocommerce-mobbex-gateway
  * Domain Path:       languages
  *
  */
@@ -55,7 +55,7 @@ if( !class_exists( 'WC_Gateway_Mobbex' ) ) {
      * @access public
      * @var    string
      */
-    static public $text_domain = 'woocommerce-payment-gateway-mobbex';
+    static public $text_domain = 'woocommerce-mobbex-gateway';
 
     /**
      * The Gateway Name.
@@ -120,7 +120,7 @@ if( !class_exists( 'WC_Gateway_Mobbex' ) ) {
      */
      public function __clone() {
        // Cloning instances of the class is forbidden
-       _doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce-payment-gateway-mobbex' ), self::$version );
+       _doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce-mobbex-gateway' ), self::$version );
      }
 
     /**
@@ -132,7 +132,7 @@ if( !class_exists( 'WC_Gateway_Mobbex' ) ) {
      */
      public function __wakeup() {
        // Unserializing instances of the class is forbidden
-       _doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce-payment-gateway-mobbex' ), self::$version );
+       _doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce-mobbex-gateway' ), self::$version );
      }
 
     /**
@@ -182,7 +182,7 @@ if( !class_exists( 'WC_Gateway_Mobbex' ) ) {
     public static function action_links( $links ) {
        if( current_user_can( 'manage_woocommerce' ) ) {
          $plugin_links = array(
-           '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=checkout&section=mobbex') . '">' . __( 'Payment Settings', 'woocommerce-payment-gateway-mobbex' ) . '</a>',
+           '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=checkout&section=mobbex') . '">' . __( 'Payment Settings', 'woocommerce-mobbex-gateway' ) . '</a>',
          );
          return array_merge( $plugin_links, $links );
        }
@@ -204,7 +204,7 @@ if( !class_exists( 'WC_Gateway_Mobbex' ) ) {
        }
 
        $links = array(
-         '<a href="' . esc_url( self::$doc_url ) . '">' . __( 'Documentation', 'woocommerce-payment-gateway-mobbex' ) . '</a>',
+         '<a href="' . esc_url( self::$doc_url ) . '">' . __( 'Documentation', 'woocommerce-mobbex-gateway' ) . '</a>',
        );
 
        $input = array_merge( $input, $links );
@@ -305,7 +305,7 @@ if( !class_exists( 'WC_Gateway_Mobbex' ) ) {
      * @return array
      */
     public static function add_currency( $currencies ) {
-      $currencies['ABC'] = __( 'Currency Name', 'woocommerce-payment-gateway-mobbex' );
+      $currencies['ABC'] = __( 'Currency Name', 'woocommerce-mobbex-gateway' );
       return $currencies;
     }
 

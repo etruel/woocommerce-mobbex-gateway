@@ -24,10 +24,10 @@ class WC_Gateway_Payment_Gateway_mobbex extends WC_Payment_Gateway {
     $this->has_fields         = false;
     $this->credit_fields      = false;
 
-    $this->order_button_text  = __( 'Pay with Mobbex', 'woocommerce-payment-gateway-mobbex' );
+    $this->order_button_text  = __( 'Pay with Mobbex', 'woocommerce-mobbex-gateway' );
 
-    $this->method_title       = __( 'Mobbex', 'woocommerce-payment-gateway-mobbex' );
-    $this->method_description = __( 'Take payments via Mobbex.', 'woocommerce-payment-gateway-mobbex' );
+    $this->method_title       = __( 'Mobbex', 'woocommerce-mobbex-gateway' );
+    $this->method_description = __( 'Take payments via Mobbex.', 'woocommerce-mobbex-gateway' );
 
     // TODO: Rename 'WC_Gateway_Payment_Gateway_mobbex' to match the name of this class.
     $this->notify_url         = WC()->api_request_url( 'WC_Gateway_Mobbex' );
@@ -119,7 +119,7 @@ class WC_Gateway_Payment_Gateway_mobbex extends WC_Payment_Gateway {
             add_post_meta( $order->id, '_transaction_id', $payment['id'], true );
 
               // Add order note.
-            $order->add_order_note( sprintf( __( 'Mobbex payment approved (ID: %s)', 'woocommerce-payment-gateway-mobbex' ), $payment['id'] ) );
+            $order->add_order_note( sprintf( __( 'Mobbex payment approved (ID: %s)', 'woocommerce-mobbex-gateway' ), $payment['id'] ) );
 
             if( $this->debug == 'yes' ) {
                 $this->log->add( $this->id, 'Mobbex payment approved (ID: ' . $payment['id'] . ')' );
@@ -144,7 +144,7 @@ class WC_Gateway_Payment_Gateway_mobbex extends WC_Payment_Gateway {
            
             /* else {
               // Add order note.
-              $order->add_order_note( __( 'Gateway Name payment declined', 'woocommerce-payment-gateway-mobbex' ) );
+              $order->add_order_note( __( 'Gateway Name payment declined', 'woocommerce-mobbex-gateway' ) );
 
               if( $this->debug == 'yes' ) {
                 $this->log->add( $this->id, 'Gateway Name payment declined (ID: ' . $payment['id'] . ')' );
@@ -196,17 +196,17 @@ class WC_Gateway_Payment_Gateway_mobbex extends WC_Payment_Gateway {
 
     // PHP Version.
     if( version_compare( phpversion(), '5.3', '<' ) ) {
-      echo '<div class="error"><p>' . sprintf( __( 'Mobbex Error: Mobbex requires PHP 5.3 and above. You are using version %s.', 'woocommerce-payment-gateway-mobbex' ), phpversion() ) . '</p></div>';
+      echo '<div class="error"><p>' . sprintf( __( 'Mobbex Error: Mobbex requires PHP 5.3 and above. You are using version %s.', 'woocommerce-mobbex-gateway' ), phpversion() ) . '</p></div>';
     }
 
     // Check required fields.
     else if( !$this->api_key || !$this->access_token) {
-      echo '<div class="error"><p>' . __( 'Mobbex Error: Please enter your Api Key and Access Token', 'woocommerce-payment-gateway-mobbex' ) . '</p></div>';
+      echo '<div class="error"><p>' . __( 'Mobbex Error: Please enter your Api Key and Access Token', 'woocommerce-mobbex-gateway' ) . '</p></div>';
     }
 
     // Show message if enabled and FORCE SSL is disabled and WordPress HTTPS plugin is not detected.
     /*else if( 'no' == get_option( 'woocommerce_force_ssl_checkout' ) && !class_exists( 'WordPressHTTPS' ) ) {
-      echo '<div class="error"><p>' . sprintf( __( 'Mobbex is enabled, but the <a href="%s">force SSL option</a> is disabled; your checkout may not be secure! Please enable SSL and ensure your server has a valid SSL certificate - Gateway Name will only work in sandbox mode.', 'woocommerce-payment-gateway-mobbex'), admin_url( 'admin.php?page=wc-settings&tab=checkout' ) ) . '</p></div>';
+      echo '<div class="error"><p>' . sprintf( __( 'Mobbex is enabled, but the <a href="%s">force SSL option</a> is disabled; your checkout may not be secure! Please enable SSL and ensure your server has a valid SSL certificate - Gateway Name will only work in sandbox mode.', 'woocommerce-mobbex-gateway'), admin_url( 'admin.php?page=wc-settings&tab=checkout' ) ) . '</p></div>';
     }
     */
   }
@@ -240,53 +240,53 @@ class WC_Gateway_Payment_Gateway_mobbex extends WC_Payment_Gateway {
   public function init_form_fields() {
     $this->form_fields = array(
       'enabled' => array(
-        'title'       => __( 'Enable/Disable', 'woocommerce-payment-gateway-mobbex' ),
-        'label'       => __( 'Enable Mobbex', 'woocommerce-payment-gateway-mobbex' ),
+        'title'       => __( 'Enable/Disable', 'woocommerce-mobbex-gateway' ),
+        'label'       => __( 'Enable Mobbex', 'woocommerce-mobbex-gateway' ),
         'type'        => 'checkbox',
         'description' => '',
         'default'     => 'yes'
       ),
       'title' => array(
-        'title'       => __( 'Title', 'woocommerce-payment-gateway-mobbex' ),
+        'title'       => __( 'Title', 'woocommerce-mobbex-gateway' ),
         'type'        => 'text',
-        'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce-payment-gateway-mobbex' ),
-        'default'     => __( 'Mobbex', 'woocommerce-payment-gateway-mobbex' ),
+        'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce-mobbex-gateway' ),
+        'default'     => __( 'Mobbex', 'woocommerce-mobbex-gateway' ),
         'desc_tip'    => true
       ),
       'description' => array(
-        'title'       => __( 'Description', 'woocommerce-payment-gateway-mobbex' ),
+        'title'       => __( 'Description', 'woocommerce-mobbex-gateway' ),
         'type'        => 'text',
-        'description' => __( 'This controls the description which the user sees during checkout.', 'woocommerce-payment-gateway-mobbex' ),
+        'description' => __( 'This controls the description which the user sees during checkout.', 'woocommerce-mobbex-gateway' ),
         'default'     => 'Pay with Mobbex.',
         'desc_tip'    => true
       ),
       'instructions' => array(
-        'title'       => __( 'Instructions', 'woocommerce-payment-gateway-mobbex' ),
+        'title'       => __( 'Instructions', 'woocommerce-mobbex-gateway' ),
         'type'        => 'textarea',
-        'description' => __( 'Instructions that will be added to the thank you page and emails.', 'woocommerce-payment-gateway-mobbex' ),
+        'description' => __( 'Instructions that will be added to the thank you page and emails.', 'woocommerce-mobbex-gateway' ),
         'default'     => '',
         'desc_tip'    => true,
       ),
       'debug' => array(
-        'title'       => __( 'Debug Log', 'woocommerce-payment-gateway-mobbex' ),
+        'title'       => __( 'Debug Log', 'woocommerce-mobbex-gateway' ),
         'type'        => 'checkbox',
-        'label'       => __( 'Enable logging', 'woocommerce-payment-gateway-mobbex' ),
+        'label'       => __( 'Enable logging', 'woocommerce-mobbex-gateway' ),
         'default'     => 'no',
-        'description' => sprintf( __( 'Log Mobbex events inside <code>%s</code>', 'woocommerce-payment-gateway-mobbex' ), wc_get_log_file_path( $this->id ) )
+        'description' => sprintf( __( 'Log Mobbex events inside <code>%s</code>', 'woocommerce-mobbex-gateway' ), wc_get_log_file_path( $this->id ) )
       ),
      
       
       'api_key' => array(
-        'title'       => __( 'API Key', 'woocommerce-payment-gateway-mobbex' ),
+        'title'       => __( 'API Key', 'woocommerce-mobbex-gateway' ),
         'type'        => 'text',
-        'description' => __( 'Get your API Key from your Mobbex Name account.', 'woocommerce-payment-gateway-mobbex' ),
+        'description' => __( 'Get your API Key from your Mobbex Name account.', 'woocommerce-mobbex-gateway' ),
         'default'     => '',
         'desc_tip'    => true
       ),
       'access_token' => array(
-        'title'       => __( 'Access Token', 'woocommerce-payment-gateway-mobbex' ),
+        'title'       => __( 'Access Token', 'woocommerce-mobbex-gateway' ),
         'type'        => 'text',
-        'description' => __( 'Get your API keys from your Mobbex Name account.', 'woocommerce-payment-gateway-mobbex' ),
+        'description' => __( 'Get your API keys from your Mobbex Name account.', 'woocommerce-mobbex-gateway' ),
         'default'     => '',
         'desc_tip'    => true
       ),
@@ -305,9 +305,9 @@ class WC_Gateway_Payment_Gateway_mobbex extends WC_Payment_Gateway {
    /*
     if (!empty($_REQUEST['wcm_p_method']) && isset($_REQUEST['status'])) {
         if ($_REQUEST['status'] == 0 || $_REQUEST['status'] == 601) {
-            echo '<p>' . __( 'Your order is cancelled.', 'woocommerce-payment-gateway-mobbex' ) . '</p>';
+            echo '<p>' . __( 'Your order is cancelled.', 'woocommerce-mobbex-gateway' ) . '</p>';
         } else if ($_REQUEST['status'] == 200 || $_REQUEST['status'] == 300) {
-            echo '<p>' . __( 'Thank you - your order is now processing.', 'woocommerce-payment-gateway-mobbex' ) . '</p>';
+            echo '<p>' . __( 'Thank you - your order is now processing.', 'woocommerce-mobbex-gateway' ) . '</p>';
         }
 
     }*/
@@ -399,7 +399,7 @@ class WC_Gateway_Payment_Gateway_mobbex extends WC_Payment_Gateway {
    * @access private
    */
   private function extra_details( $order_id = '' ) {
-    echo '<h2>' . __( 'Extra Details', 'woocommerce-payment-gateway-mobbex' ) . '</h2>' . PHP_EOL;
+    echo '<h2>' . __( 'Extra Details', 'woocommerce-mobbex-gateway' ) . '</h2>' . PHP_EOL;
 
     // TODO: Place what ever instructions or details the payment gateway needs to display here.
   }
@@ -512,9 +512,9 @@ class WC_Gateway_Payment_Gateway_mobbex extends WC_Payment_Gateway {
     if( 'APPROVED' == $refund['status'] ) {
 
       // Mark order as refunded
-      $order->update_status( 'refunded', __( 'Payment refunded via Gateway Name.', 'woocommerce-payment-gateway-mobbex' ) );
+      $order->update_status( 'refunded', __( 'Payment refunded via Gateway Name.', 'woocommerce-mobbex-gateway' ) );
 
-      $order->add_order_note( sprintf( __( 'Refunded %s - Refund ID: %s', 'woocommerce-payment-gateway-mobbex' ), $refunded_cost, $refund_transaction_id ) );
+      $order->add_order_note( sprintf( __( 'Refunded %s - Refund ID: %s', 'woocommerce-mobbex-gateway' ), $refunded_cost, $refund_transaction_id ) );
 
       if( $this->debug == 'yes' ) {
         $this->log->add( $this->id, 'Gateway Name order #' . $order_id . ' refunded successfully!' );
@@ -523,7 +523,7 @@ class WC_Gateway_Payment_Gateway_mobbex extends WC_Payment_Gateway {
     }
     else {
 
-      $order->add_order_note( __( 'Error in refunding the order.', 'woocommerce-payment-gateway-mobbex' ) );
+      $order->add_order_note( __( 'Error in refunding the order.', 'woocommerce-mobbex-gateway' ) );
 
       if( $this->debug == 'yes' ) {
         $this->log->add( $this->id, 'Error in refunding the order #' . $order_id . '. Gateway Name response: ' . print_r( $response, true ) );

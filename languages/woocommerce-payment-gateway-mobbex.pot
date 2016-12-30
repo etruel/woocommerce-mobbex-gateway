@@ -251,31 +251,31 @@ msgstr ""
 msgid "Error in refunding the order."
 msgstr ""
 
-#: woocommerce-payment-gateway-mobbex.php:141
-#: woocommerce-payment-gateway-mobbex.php:153
+#: woocommerce-mobbex-gateway.php:141
+#: woocommerce-mobbex-gateway.php:153
 msgid "Cheatin&#8217; huh?"
 msgstr ""
 
-#: woocommerce-payment-gateway-mobbex.php:201
+#: woocommerce-mobbex-gateway.php:201
 msgid "Payment Settings"
 msgstr ""
 
-#: woocommerce-payment-gateway-mobbex.php:223
+#: woocommerce-mobbex-gateway.php:223
 msgid "Documentation"
 msgstr ""
 
-#: woocommerce-payment-gateway-mobbex.php:324
+#: woocommerce-mobbex-gateway.php:324
 msgid "Currency Name"
 msgstr ""
 
-#: woocommerce-payment-gateway-mobbex.php:352
+#: woocommerce-mobbex-gateway.php:352
 #, php-format
 msgid ""
 "Sorry, <strong>WooCommerce %s</strong> requires WooCommerce to be installed "
 "and activated first. Please install <a href=\"%s\">WooCommerce</a> first."
 msgstr ""
 
-#: woocommerce-payment-gateway-mobbex.php:362
+#: woocommerce-mobbex-gateway.php:362
 #, php-format
 msgid ""
 "WooCommerce %s depends on version 2.2 and up of WooCommerce for this gateway "
