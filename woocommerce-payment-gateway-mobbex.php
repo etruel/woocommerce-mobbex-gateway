@@ -1,17 +1,15 @@
 <?php
 /*
- * Plugin Name:       WooCommerce Payment Gateway mobbex
- * Plugin URI:        http://www.sebastiendumont.com/plugins/mobbexs/woocommerce-payment-gateway-mobbex/
- * Description:       A payment gateway mobbex created to help get you started in developing a payment gateway for WooCommerce.
+ * Plugin Name:       WooCommerce Mobbex Gateway
+ * Plugin URI:        https://bitbucket.org/etruel/woocommerce-mobbex-gateway
+ * Description:       A payment gateway created to help get payments by Mobbex with WooCommerce.
  * Version:           1.0.0
- * Author:            Etruel
- * Author URI:        http://www.google.com
- * Requires at least: 4.0
- * Tested up to:      4.0
+ * Author:            etruel, sniuk
+ * Author URI:        https://etruel.com
+ * Requires at least: 4.1
+ * Tested up to:      4.8
  * Text Domain:       woocommerce-payment-gateway-mobbex
  * Domain Path:       languages
- * Network:           false
- * GitHub Plugin URI: https://github.com/seb86/WooCommerce-Payment-Gateway-mobbex
  *
  */
 if( !defined( 'ABSPATH' ) ) exit; // Exit if accessed directly.
@@ -84,7 +82,7 @@ if( !class_exists( 'WC_Gateway_Mobbex' ) ) {
      * @access public
      * @var    string
      */
-     static public $web_url = "http://www.sebastiendumont.com/plugins/mobbexs/woocommerce-payment-gateway-mobbex/";
+     static public $web_url = "http://www.sebastiendumont.com/plugins/woocommerce-payment-gateway-mobbex/";
 
     /**
      * The Gateway documentation URL.
@@ -93,7 +91,7 @@ if( !class_exists( 'WC_Gateway_Mobbex' ) ) {
      * @access public
      * @var    string
      */
-     static public $doc_url = "https://github.com/seb86/WooCommerce-Payment-Gateway-mobbex/wiki/";
+     static public $doc_url = "https://bitbucket.org/etruel/woocommerce-mobbex-gateway/wiki/";
 
     /**
      * Return an instance of this class.
