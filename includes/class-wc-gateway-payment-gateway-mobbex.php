@@ -104,7 +104,7 @@ class WC_Gateway_Payment_Gateway_mobbex extends WC_Payment_Gateway {
 
   public function check_ipn_response() {
       if( $this->debug == 'yes' ) {
-          $this->log->add( $this->id, 'Mobbex IPN response: ' . print_r($_REQUEST, true ) . '' );
+          $this->log->add( $this->id, 'Mobbex IPN response: ' . print_r($_REQUEST, true ) . ' ' );
       }  
       if (!empty($_REQUEST['token_mobbex_ipn']) && !empty($_REQUEST['order_id'])) {
           $token_ipn = md5($this->access_token.'|'.$this->api_key);
@@ -424,6 +424,9 @@ class WC_Gateway_Payment_Gateway_mobbex extends WC_Payment_Gateway {
     $token_ipn = md5($this->access_token.'|'.$this->api_key);
     $webhook_url = add_query_arg('token_mobbex_ipn', $token_ipn, $this->notify_url); 
     $webhook_url = add_query_arg('order_id', $order_id, $webhook_url); 
+    if( $this->debug == 'yes' ) {
+        $this->log->add( $this->id, 'Mobbex WebHook: ' . $webhook_url. ''.PHP_EOL );
+    }  
     $response = wp_remote_post('https://mobbex.com/p/checkout/create', array(
         'method' => 'POST',
         'timeout' => 45,
