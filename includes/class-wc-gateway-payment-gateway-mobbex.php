@@ -102,16 +102,34 @@ class WC_Gateway_Payment_Gateway_mobbex extends WC_Payment_Gateway {
   }
 
 
-  public function check_ipn_response() {
-      if( $this->debug == 'yes' ) {
-          $this->log->add( $this->id, 'Mobbex IPN response: ' . print_r($_REQUEST, true ) . ' ' );
-      }  
-      if (!empty($_REQUEST['token_mobbex_ipn']) && !empty($_REQUEST['order_id'])) {
-          $token_ipn = md5($this->access_token.'|'.$this->api_key);
-          if ($_REQUEST['token_mobbex_ipn'] == $token_ipn) {
+public function check_ipn_response() {
+    if( $this->debug == 'yes' ) {
+        $this->log->add( $this->id, 'Mobbex IPN response: ' . print_r($_REQUEST, true ) . ' ' );
+    }
+    $autorized_status = array(200);
+    $payment_id = 0;
+    $completed = false;
+    if (isset($_REQUEST['data']['payment']['status']['code'])) {
+      	if (in_array($_REQUEST['data']['payment']['status']['code'], $autorized_status) ) {
+      		$completed = true;
+      	}
+    }  
+    if (isset($_REQUEST['data']['payment']['id'])) {
+      	$payment_id = $_REQUEST['data']['payment']['id'];
+    }  
+    if (!empty($_REQUEST['token_mobbex_ipn']) && !empty($_REQUEST['order_id'])) {
+        $token_ipn = md5($this->access_token.'|'.$this->api_key);
+        if ($_REQUEST['token_mobbex_ipn'] == $token_ipn && $_REQUEST['type'] == 'checkout' && $completed) {
+
             $payment = array();
-            $payment['id'] = 111;
+            $payment['id'] = $payment_id;
             $order = new WC_Order( $_REQUEST['order_id'] );
+            $current_payment = get_post_meta($order->id, '_transaction_id', '');
+
+            // Avoid duplicate order processing
+            if ($current_payment == $payment['id']) {
+            	return true;
+            }
             // Payment complete.
             $order->payment_complete();
 
@@ -126,7 +144,7 @@ class WC_Gateway_Payment_Gateway_mobbex extends WC_Payment_Gateway {
             }
 
               // Reduce stock levels.
-            $order->reduce_order_stock();
+           // $order->reduce_order_stock();
 
             if( $this->debug == 'yes' ) {
                 $this->log->add( $this->id, 'Stocked reduced.' );
@@ -141,23 +159,7 @@ class WC_Gateway_Payment_Gateway_mobbex extends WC_Payment_Gateway {
 
               // Return thank you page redirect.
             return true;
-           
-            /* else {
-              // Add order note.
-              $order->add_order_note( __( 'Gateway Name payment declined', 'woocommerce-mobbex-gateway' ) );
-
-              if( $this->debug == 'yes' ) {
-                $this->log->add( $this->id, 'Gateway Name payment declined (ID: ' . $payment['id'] . ')' );
-              }
-
-              // Return message to customer.
-              return array(
-                'result'   => 'failure',
-                'message'  => '',
-                'redirect' => ''
-              );
-            }
-             */ 
+          
           }
       }
 
@@ -544,7 +546,7 @@ class WC_Gateway_Payment_Gateway_mobbex extends WC_Payment_Gateway {
    */
   public function get_transaction_url( $order ) {
     
-      $this->view_transaction_url = 'https://www.sandbox.payment-gateway.com/?trans_id=%s';
+      $this->view_transaction_url = 'https://mobbex.com/p/checkout/view/%s';
    
 
     return parent::get_transaction_url( $order );
