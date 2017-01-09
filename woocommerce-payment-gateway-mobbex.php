@@ -229,7 +229,6 @@ if( !class_exists( 'WC_Gateway_Mobbex' ) ) {
       // Traditional WordPress plugin locale filter
       $locale = apply_filters( 'plugin_locale',  get_locale(), self::$text_domain );
       $mofile = sprintf( '%1$s-%2$s.mo', self::$text_domain, $locale );
-
       // Setup paths to current locale file
       $mofile_local  = $lang_dir . $mofile;
       $mofile_global = WP_LANG_DIR . '/' . self::$text_domain . '/' . $mofile;
