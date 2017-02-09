@@ -3,7 +3,7 @@
  * Plugin Name:       WooCommerce Mobbex Gateway
  * Plugin URI:        https://bitbucket.org/etruel/woocommerce-mobbex-gateway
  * Description:       A payment gateway created to help get payments by Mobbex with WooCommerce.
- * Version:           1.0.0
+ * Version:           1.1
  * Author:            etruel, sniuk
  * Author URI:        https://etruel.com
  * Requires at least: 4.1
@@ -29,6 +29,14 @@ if( !class_exists( 'WC_Gateway_Mobbex' ) ) {
    * @version 1.0.0
    */
   final class WC_Gateway_Mobbex {
+
+    /**
+     * Gateway version.
+     *
+     * @access public
+     * @var    string
+     */
+    static public $version = '1.1';
 
     /**
      * Instance of this class.
@@ -66,14 +74,6 @@ if( !class_exists( 'WC_Gateway_Mobbex' ) ) {
      * @var    string
      */
      static public $name = "Payment Gateway mobbex";
-
-    /**
-     * Gateway version.
-     *
-     * @access public
-     * @var    string
-     */
-    static public $version = '1.0.0';
 
     /**
      * The Gateway URL.
