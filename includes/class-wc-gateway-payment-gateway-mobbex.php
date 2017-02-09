@@ -32,6 +32,8 @@ class WC_Gateway_Payment_Gateway_mobbex extends WC_Payment_Gateway {
     // TODO: Rename 'WC_Gateway_Payment_Gateway_mobbex' to match the name of this class.
     $this->notify_url         = WC()->api_request_url( 'WC_Gateway_Mobbex' );
 
+    $this->return_url         = WC()->api_request_url( 'Return_URL_Mobbex' );
+
    
     // TODO: 
     $this->api_endpoint       = 'https://mobbex.com/';
@@ -99,24 +101,77 @@ class WC_Gateway_Payment_Gateway_mobbex extends WC_Payment_Gateway {
     add_action( 'woocommerce_email_before_order_table', array( $this, 'email_instructions' ), 10, 3 );
 
     add_action( 'woocommerce_api_wc_gateway_mobbex', array( $this, 'check_ipn_response' ) );
+
+    add_action( 'woocommerce_api_return_url_mobbex', array( $this, 'return_url_mobbex' ) );
   }
 
+  public function return_url_mobbex() {
+      $this->log->add( $this->id, 'Return url executed.');
 
+      $this->log->add( $this->id, 'Request:'.var_export($_REQUEST, true));
+      $token_ipn = md5($this->access_token.'|'.$this->api_key);
+      $order_id = '';
+      if (!empty($_REQUEST['order_id'])) {
+        $order_id = $_REQUEST['order_id'];
+      }
+      $status = 0;
+      if (!empty($_REQUEST['status'])) {
+        $status = $_REQUEST['status'];
+      }
+      if (!empty($_REQUEST['token_mobbex_ipn']) && !empty($order_id)) {
+        
+        if ($_REQUEST['token_mobbex_ipn'] == $token_ipn) {
+            $order = new WC_Order($order_id);
+            //echo $this->get_return_url($order);
+            if ($status == 0) {
+              wp_redirect($order->get_cancel_order_url_raw());
+              exit;
+            }
+            $mobbex_webhook = get_post_meta($order->id, '_mobbex_webhook', false);
+            $this->log->add( $this->id, '_mobbex_webhook get:'.var_export($mobbex_webhook , true));
+            if ($mobbex_webhook == false) {
+              wp_redirect($order->get_cancel_order_url_raw());
+              exit;
+            }
+
+            wp_redirect($this->get_return_url($order));
+            exit;
+        }
+      }
+    //return false;
+  }
 public function check_ipn_response() {
     if( $this->debug == 'yes' ) {
         $this->log->add( $this->id, 'Mobbex IPN response: ' . print_r($_REQUEST, true ) . ' ' );
     }
-    $autorized_status = array(200);
-    $payment_id = 0;
+    $autorized_status_cart = array(3, 200, 300, 301, 400);
+    $autorized_status_cash = array(2, 200);
     $completed = false;
-    if (isset($_REQUEST['data']['payment']['status']['code'])) {
-      	if (in_array($_REQUEST['data']['payment']['status']['code'], $autorized_status) ) {
-      		$completed = true;
-      	}
-    }  
+    $payment_id = 0;
     if (isset($_REQUEST['data']['payment']['id'])) {
-      	$payment_id = $_REQUEST['data']['payment']['id'];
-    }  
+        $payment_id = $_REQUEST['data']['payment']['id'];
+    } 
+    $status_payment = 0;
+    if (isset($_REQUEST['data']['payment']['status']['code'])) {
+      $status_payment = $_REQUEST['data']['payment']['status']['code'];
+    }
+
+    $payment_type = '';
+    if (isset($_REQUEST['data']['view']['type'])) {
+      $payment_type = $_REQUEST['data']['view']['type'];
+    }
+   
+    if ($payment_type == 'card'){
+      if (in_array($status_payment, $autorized_status_cart) ) {
+         $completed = true;
+      }
+    } else if ($payment_type == 'cash'){
+        if (in_array($status_payment, $autorized_status_cash) ) {
+            $completed = true;
+        }
+    }
+   
+
     if (!empty($_REQUEST['token_mobbex_ipn']) && !empty($_REQUEST['order_id'])) {
         $token_ipn = md5($this->access_token.'|'.$this->api_key);
         if ($_REQUEST['token_mobbex_ipn'] == $token_ipn && $_REQUEST['type'] == 'checkout' && $completed) {
@@ -135,6 +190,8 @@ public function check_ipn_response() {
 
             // Store the transaction ID for WC 2.2 or later.
             add_post_meta( $order->id, '_transaction_id', $payment['id'], true );
+            $this->log->add( $this->id, '_mobbex_webhook added');
+            update_post_meta( $order->id, '_mobbex_webhook', $_REQUEST['data']);
 
               // Add order note.
             $order->add_order_note( sprintf( __( 'Mobbex payment approved (ID: %s)', 'woocommerce-mobbex-gateway' ), $payment['id'] ) );
@@ -417,13 +474,17 @@ public function check_ipn_response() {
   public function process_payment( $order_id ) {
     $order = new WC_Order( $order_id );
 
-    $return_url = add_query_arg( 'wcm_p_method', 'mobbex', $this->get_return_url( $order ));
+    
     // This array is used just for demo testing a successful transaction.
     $description = '';
     foreach ( $order->get_items() as $item ) {
         $description .= $item['name'].PHP_EOL;
     }
     $token_ipn = md5($this->access_token.'|'.$this->api_key);
+
+    $return_url = add_query_arg('token_mobbex_ipn', $token_ipn, $this->return_url);
+    $return_url = add_query_arg('order_id', $order_id, $return_url); 
+
     $webhook_url = add_query_arg('token_mobbex_ipn', $token_ipn, $this->notify_url); 
     $webhook_url = add_query_arg('order_id', $order_id, $webhook_url); 
     $response = wp_remote_post('https://mobbex.com/p/checkout/create', array(
@@ -502,6 +563,7 @@ public function check_ipn_response() {
    * @param  string $reason
    * @return bool|WP_Error
    */
+  
   public function process_refund( $order_id, $amount = null, $reason = '' ) {
 
     $payment_id = get_post_meta( $order_id, '_transaction_id', true );

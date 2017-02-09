@@ -257,9 +257,9 @@ if( !class_exists( 'WC_Gateway_Mobbex' ) ) {
       include_once( 'includes/class-wc-gateway-' . str_replace( '_', '-', self::$gateway_slug ) . '.php' );
 
       // This supports the plugin extensions 'WooCommerce Subscriptions' and 'WooCommerce Pre-orders'.
-      if( class_exists( 'WC_Subscriptions_Order' ) || class_exists( 'WC_Pre_Orders_Order' ) ) {
-        include_once( 'includes/class-wc-gateway-' . str_replace( '_', '-', self::$gateway_slug ) . '-add-ons.php' );
-      }
+      //if( class_exists( 'WC_Subscriptions_Order' ) || class_exists( 'WC_Pre_Orders_Order' ) ) {
+        //include_once( 'includes/class-wc-gateway-' . str_replace( '_', '-', self::$gateway_slug ) . '-add-ons.php' );
+      //}
     }
 
     /**
@@ -283,12 +283,12 @@ if( !class_exists( 'WC_Gateway_Mobbex' ) ) {
       // This checks if the gateway is supported for your country.
       
 
-        if( class_exists( 'WC_Subscriptions_Order' ) ) {
-          $methods[] = 'WC_Gateway_' . str_replace( ' ', '_', self::$name ) . '_Subscription';
-        }
-        else {
+        //if( class_exists( 'WC_Subscriptions_Order' ) ) {
+          //$methods[] = 'WC_Gateway_' . str_replace( ' ', '_', self::$name ) . '_Subscription';
+       // }
+       // else {
           $methods[] = 'WC_Gateway_' . str_replace( ' ', '_', self::$name );
-        }
+        //}
 
       
 
@@ -304,7 +304,7 @@ if( !class_exists( 'WC_Gateway_Mobbex' ) ) {
      * @return array
      */
     public static function add_currency( $currencies ) {
-      $currencies['ABC'] = __( 'Currency Name', 'woocommerce-mobbex-gateway' );
+      //$currencies['ABC'] = __( 'Currency Name', 'woocommerce-mobbex-gateway' );
       return $currencies;
     }
 
