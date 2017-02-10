@@ -506,7 +506,7 @@ public function check_ipn_response() {
               'description' => $description,
               'webhook'     => $webhook_url,
               'return_url' => $return_url,
-
+              'email'       => $order->billing_email
           ),
         'cookies' => array()
         )
