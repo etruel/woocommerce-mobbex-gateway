@@ -196,6 +196,10 @@ public function check_ipn_response() {
             $this->log->add( $this->id, '_mobbex_webhook added');
             update_post_meta( $order->id, '_mobbex_webhook', $_REQUEST['data']);
             update_post_meta( $order->id, '_payment_method', $_REQUEST['data']['payment']['source']['name']);
+            update_post_meta( $order->id, '_payment_method_title', $_REQUEST['data']['payment']['source']['name']);
+            
+
+
               // Add order note.
             $order->add_order_note( sprintf( __( 'Mobbex payment approved (ID: %s)', 'woocommerce-mobbex-gateway' ), $payment['id'] ) );
 
