@@ -103,6 +103,9 @@ class WC_Gateway_Payment_Gateway_mobbex extends WC_Payment_Gateway {
     add_action( 'woocommerce_api_wc_gateway_mobbex', array( $this, 'check_ipn_response' ) );
 
     add_action( 'woocommerce_api_return_url_mobbex', array( $this, 'return_url_mobbex' ) );
+  
+
+
   }
 
   public function return_url_mobbex() {
@@ -144,7 +147,7 @@ public function check_ipn_response() {
     if( $this->debug == 'yes' ) {
         $this->log->add( $this->id, 'Mobbex IPN response: ' . print_r($_REQUEST, true ) . ' ' );
     }
-    $autorized_status_cart = array(3, 200, 300, 301, 400);
+    $autorized_status_cart = array(3, 200, 300, 301);
     $autorized_status_cash = array(2, 200);
     $completed = false;
     $payment_id = 0;
@@ -192,7 +195,7 @@ public function check_ipn_response() {
             add_post_meta( $order->id, '_transaction_id', $payment['id'], true );
             $this->log->add( $this->id, '_mobbex_webhook added');
             update_post_meta( $order->id, '_mobbex_webhook', $_REQUEST['data']);
-
+            update_post_meta( $order->id, '_payment_method', $_REQUEST['data']['payment']['source']['name']);
               // Add order note.
             $order->add_order_note( sprintf( __( 'Mobbex payment approved (ID: %s)', 'woocommerce-mobbex-gateway' ), $payment['id'] ) );
 
